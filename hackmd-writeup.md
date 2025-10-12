@@ -1,160 +1,82 @@
 ---
-title: "Natas 10 -> 11:Overthewire"
-description: XOR encryption from cyphertext to plaintext
-tags: CTF, Web, XOR-encryption
-robots: index, follow
+title: "byp4ss3d - Web Exploitation Writeup"
+description:  Directory Traversal,manipulating .htaccess file
+tags: CTF,Web,Path Traversal, PortSwigger-2024
 lang: en
 breaks: true
 ---
 
-# Natas11 Writeup
+
+# byp4ss3d Writeup
 
 [TOC]
 
 ## How it works
-this web design just like the same to the level 10 but the password being protected with the XOR_encryption
+The challenge say that we must upload ID student verification and the web only allow the file that only contain file in PNG,JPG or GIF , any file different is not allow
 
-From the request, we could see there is a cookie data for web application and when we access to the web page there is the background color for set color but it does not matter the result
+When i send random picture that PNG , the request send to the server its web boundary in the `content_type` where it will store many types of file and Acts as a separator between different form fields and files
 
-The thing that we must focus on is the set_cookie data in response
+=>We can now see that the what type of file called the `Content-Disposition`  for name and filename, `content-type` for type of file
 
-## problem
-Look  at the viewsource code, we could see this is the blended code with html and php, `index-source.html` , i can see there are conditions to get the flag:
+## The Problem
 
-```php=
-$defaultdata = array( "showpassword"=>"no", "bgcolor"=>"#ffffff");
+Since challenge ask us to look carefully at how the file upload to server so we can examine it:
 
-function xor_encrypt($in) {
-    $key = '<censored>';
-    $text = $in;
-    $outText = '';
+:bulb: We know that the server is stored the file we upload the process it in the upload.php path
 
-    // Iterate through each character
-    for($i=0;$i<strlen($text);$i++) {
-    $outText .= $text[$i] ^ $key[$i % strlen($key)];
-    }
+The only way to actually pass through the upload.php path is try to change it file upload(picture) to give the access to file they want to upload
 
-    return $outText;
-}
+:point_right: That the idea
 
-```
-this one is for the request when we have our cookie and the cookie is being encrypted with XOR for each `$i`
+## Solution
 
-Another condition is that 
-```php=
-function loadData($def) {
-    global $_COOKIE;
-    $mydata = $def;
-    if(array_key_exists("data", $_COOKIE)) {
-    $tempdata = json_decode(xor_encrypt(base64_decode($_COOKIE["data"])), true);
-    if(is_array($tempdata) && array_key_exists("showpassword", $tempdata) && array_key_exists("bgcolor", $tempdata)) {
-        if (preg_match('/^#(?:[a-f\d]{6})$/i', $tempdata['bgcolor'])) {
-        $mydata['showpassword'] = $tempdata['showpassword'];
-        $mydata['bgcolor'] = $tempdata['bgcolor'];
-        }
-    }
-    }
-    return $mydata;
-}
+From the hint from the CTF challenge say that `Apache can be tricked into executing non-PHP files as PHP with a .htaccess file.`
+:point_right: This mean that adding a file that have the file name.htaccess(which is path) for directory and then adding php file for acception that make the apache server read the file as the PNG file
+
+Hint 2: `Try uploading more than just one file.
+` After give access to server to read the php file as the `image` , we can adding another file that contain php code for execute the code command in the file
+
+### Directory Traversal
+Talk a little bit how directory work and how can we exploit it
+
+- By giving the server the file path that access to the `.htaccess` path which can directly to the `Apache` server
+-From that we can change the content- type or Content-Disposition from the request and Post to the server
+
+This is how I can change the Request to the server to disguise the php file as image file
 
 
-```
-This mean that it will edit the cookie and save it to `$tempdata` with json_decode -> XOR_encrypt -> base64_decode 
-
-The php code also block all the special syntax like `'/^#(?:[a-f\d]`
-
-Finally the `$tempdata` being encoded to become another plaintext being encrypted with `cyphertext` and `key` and it must pass this condition to pass the text
-```php=
-function saveData($d) {
-    setcookie("data", base64_encode(xor_encrypt(json_encode($d))));
-}
-
-$data = loadData($defaultdata);
-
-if(array_key_exists("bgcolor",$_REQUEST)) {
-    if (preg_match('/^#(?:[a-f\d]{6})$/i', $_REQUEST['bgcolor'])) {
-        $data['bgcolor'] = $_REQUEST['bgcolor'];
-    }
-}
-
-saveData($data);
-```
-See that, the cookie being encoded again 
-
-## solution
-
-### Step 1
-So the first thought that come up to my mind is that we must write up our script for the find the key of the cookie
-
-because the cookie being encrypted not only 1 but 2 times
-
-When I find the key , I could decrypted the cyphertext to find the real plaintext of `newcookie`
+![Screenshot 2025-10-12 124923](https://hackmd.io/_uploads/rJItQTOpeg.png)
 
 
-Here is my first code for finding the key
+
+Ok now go forward and then upload another file contain php code, command the server to execute all the file `ls -la`
+
+This is the second file i upload:
 
 
-```php=
-#!/usr/bin/php
-<?php
-$defaultdata = array("showpassword"=>"no", "bgcolor"=>"#ffffff");
-
-function xor_encrypt($in) {
-        $key = base64_decode('HmYkBwozJw4WNyAAFyB1VUcqOE1JZjUIBis7ABdmbU1GIjEJAyIxTRg%3D');
-        $text = $in;
-        $outText = '';
-
-        for($i=0;$i<strlen($text); $i++){
-        $outText .= $text[$i] ^ $key[$i % strlen($key)];
-        }
-        return $outText;
-}
-$b = xor_encrypt(json_encode($defaultdata));
-print($b);
-?>
 
 
-```
-
-Next you will give permission for the code running and get the key`chmod +x sample.php                                                                        
-./sample.php`
-here is the key `eDWoeDWoeDWoeDWoeDWoeDWoeDWoeDWoeDWoeDWoe`
-
-### Step2
-You will create another find for check the condition for password checking if yes
- here is the code
-```php=
-#!/usr/bin/php
-<?php
-$defaultdata = array( "showpassword"=>"yes", "bgcolor"=>"#ffffff");
-function xor_encrypt($in){
-        $key = "eDWo";
-        $text = $in;
-        $outText = '';
-
-        for($i=0;$i<strlen($text);$i++){
-        $outText .= $text[$i] ^ $key[$i % strlen($key)];
-        }
-        return $outText;
-}
-$new_cookie = base64_encode(xor_encrypt(json_encode($defaultdata)));
-print($new_cookie);
-?>
-```
+![Screenshot 2025-10-12 124933](https://hackmd.io/_uploads/rkAtX6dpxx.png)
 
 
-for this code it will get the key for decrytion from the `cyphertext` and we will get out new_cookie back (the correct one)
-here is the new-cookie:
-```
-HmYkBwozJw4WNyAAFyB1VUc9MhxHaHUNAic4Awo2dVVHZzEJAyIxCUc5
-```
 
-### Final
-Get access to burp suite and go back to the link again
 
-From the `request` , change the old cookie to the new_cookie and pick forward, and your flag is there
 
-**Flag** `The password for natas12 is yZdkjAYZRd3R7tq7T5kXMjMJlOIkzDeB`
 
-**Author:** @minhkhoav47  
-**Solved:** October 10, 2025
+There is a command `system('find / -name "*flag*" 2>/dev/null')` with 2>/dev/null mean you give permission to the server that we will get all the file in type of image but actually it is the php code file. So here is the result
+
+![Screenshot 2025-10-12 125158](https://hackmd.io/_uploads/Byv9XTdTxx.png)
+
+Here we can see the path for the flag `/var/www/flag.txt`
+
+
+
+### Final step
+
+Modify your shell.png and get access to the link
+
+![Screenshot 2025-10-12 125445](https://hackmd.io/_uploads/rJlsXp_6xx.png)
+
+**Flag:** Here is the flag `picoCTF{s3rv3r_byp4ss_191e9557}`
+**Author:**@minhkhoav47
+**solved:** October 12, 2025
