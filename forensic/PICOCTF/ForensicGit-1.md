@@ -308,6 +308,9 @@ blob 86 0f7655...
 
 Manually resolving one hash at a time works but is slow and error-prone at scale. A faster, more reliable path: use **Autopsy** to browse the filesystem GUI-side, dump every object under `.git/objects/` in bulk, then batch-decompress with a small script instead of calling `openssl zlib -d` by hand each time.
 
+<img width="626" height="200" alt="Screenshot 2026-09-27 141900" src="https://github.com/user-attachments/assets/57f547fa-60e8-410e-a828-23f299cc5ba7" />
+
+
 **Step 1 — Dump every relevant inode to raw files**
 
 ```bash
