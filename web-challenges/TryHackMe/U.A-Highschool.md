@@ -86,7 +86,7 @@ index.php            (Status: 200) [Size: 0]
 - `/assets/images/` redirected, but its contents weren't browsable without already knowing a filename.
 - `/assets/index.php` responded `200 OK` with an **empty body**:
 
-![image](https://hackmd.io/_uploads/BJiutpWaGe.png)
+![image](https://github.com/Khoavo-187/Writeup-CTF/blob/main/screenshot/UA-first.png)
 
 ### Finding the command injection
 
@@ -111,7 +111,7 @@ The script runs whatever is passed in `cmd` through `shell_exec()` and base64-en
 
 **Testing it:**
 
-![image](https://hackmd.io/_uploads/S1iPi6-aGe.png)
+![image](https://github.com/Khoavo-187/Writeup-CTF/blob/main/screenshot/UA-second.png)
 
 > [!TIP]
 > The response is base64-encoded, so it's easiest to decode in Burp Suite (or `base64 -d`). Decoding confirmed the web server process runs as `www-data`.
@@ -133,7 +133,7 @@ nc -lvnp 9001
 
 Result:
 
-![image](https://hackmd.io/_uploads/ryjHJCZpfx.png)
+![image](https://github.com/Khoavo-187/Writeup-CTF/blob/main/screenshot/UA-third.png)
 
 With a shell as `www-data`, next step was finding a path to the user and root flags.
 
@@ -309,7 +309,7 @@ ssh-rsa AAAA...<rest of id_rsa.pub contents>... kali@kali > /root/.ssh/authorize
 ```
 <!-- TODO: confirm this matches the exact payload you entered — cross-check against your screenshot below -->
 
-![image](https://hackmd.io/_uploads/Sk92mI4pfx.png)
+![image](https://github.com/Khoavo-187/Writeup-CTF/blob/main/screenshot/UA-fourth.png)
 
 **3. Lock down the private key and connect as root:**
 ```bash
